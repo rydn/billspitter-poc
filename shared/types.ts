@@ -31,6 +31,10 @@ export interface Bill {
 /** Response shape for the analyze-bill endpoint. */
 export interface AnalyzeBillResponse {
   bill: Bill;
+  /** Which OCR provider produced the result: "local" or "gemini". */
+  provider: "local" | "gemini";
+  /** Provider/model label, e.g. "qwen3-vl:8b" or "gemini-2.5-flash". */
+  model: string;
 }
 
 /** Error response shape for API failures. */

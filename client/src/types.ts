@@ -19,6 +19,8 @@ export interface Bill {
 
 export interface AnalyzeBillResponse {
   bill: Bill;
+  provider: "local" | "gemini";
+  model: string;
 }
 
 export interface Person {

@@ -1,10 +1,11 @@
-import type { AnalyzeBillResponse, Bill } from "./types";
+import type { AnalyzeBillResponse } from "./types";
 
 /**
- * Upload a bill image to the backend and return the parsed Bill.
+ * Upload a bill image to the backend and return the parsed result
+ * (the Bill plus which OCR provider produced it).
  * Throws an Error with a user-friendly message on failure.
  */
-export async function analyzeBill(file: File): Promise<Bill> {
+export async function analyzeBill(file: File): Promise<AnalyzeBillResponse> {
   const form = new FormData();
   form.append("image", file);
 
@@ -27,5 +28,5 @@ export async function analyzeBill(file: File): Promise<Bill> {
   }
 
   const data = (await res.json()) as AnalyzeBillResponse;
-  return data.bill;
+  return data;
 }

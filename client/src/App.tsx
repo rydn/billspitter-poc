@@ -9,6 +9,9 @@ import "./App.css";
 
 function App() {
   const [bill, setBill] = useState<Bill | null>(null);
+  const [source, setSource] = useState<{ provider: string; model: string } | null>(
+    null
+  );
   const [assignments, setAssignments] = useState<Assignments>({});
   const [tipInput, setTipInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,15 +22,17 @@ function App() {
     setError(null);
     try {
       const result = await analyzeBill(file);
-      setBill(result);
+      setBill(result.bill);
+      setSource({ provider: result.provider, model: result.model });
       setAssignments({});
       setTipInput("");
-      if (result.items.length === 0) {
+      if (result.bill.items.length === 0) {
         setError("No line items were detected. Try a clearer photo.");
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
       setBill(null);
+      setSource(null);
     } finally {
       setLoading(false);
     }
@@ -56,6 +61,15 @@ function App() {
 
       {bill && bill.items.length > 0 && (
         <>
+          {source && (
+            <p className="source-badge">
+              Read by{" "}
+              <strong>
+                {source.provider === "local" ? "local model" : "Gemini"}
+              </strong>{" "}
+              <code>{source.model}</code>
+            </p>
+          )}
           <BillView
             bill={bill}
             people={PEOPLE}

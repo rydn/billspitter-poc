@@ -2,7 +2,7 @@ import "dotenv/config";
 import express, { type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
 import multer from "multer";
-import { analyzeBill } from "./gemini.js";
+import { analyzeBill } from "./analyze.js";
 import type { AnalyzeBillResponse, ApiError } from "../../shared/types.js";
 
 const PORT = Number(process.env.PORT ?? 3001);
@@ -36,15 +36,30 @@ app.post(
       return;
     }
 
+    const reqStart = performance.now();
+    const sizeKb = (req.file.size / 1024).toFixed(0);
+    console.log(
+      `[request] analyze-bill: ${req.file.mimetype}, ${sizeKb} KB`
+    );
+
     try {
-      const bill = await analyzeBill(req.file.buffer, req.file.mimetype);
-      res.json({ bill });
+      const result = await analyzeBill(req.file.buffer, req.file.mimetype);
+      const totalMs = Math.round(performance.now() - reqStart);
+      console.log(
+        `[request] done in ${totalMs}ms via ${result.provider} (${result.model}): ${result.bill.items.length} items`
+      );
+      res.json({
+        bill: result.bill,
+        provider: result.provider,
+        model: result.model,
+      });
     } catch (err) {
+      const totalMs = Math.round(performance.now() - reqStart);
       const message =
         err instanceof Error ? err.message : "Failed to analyze the bill.";
-      console.error("analyze-bill failed:", message);
+      console.error(`[request] failed after ${totalMs}ms:`, message);
       // Surface configuration errors as 500; everything else as 502 (upstream).
-      const status = message.includes("GEMINI_API_KEY") ? 500 : 502;
+      const status = /not configured|not available/i.test(message) ? 500 : 502;
       res.status(status).json({ error: message });
     }
   }

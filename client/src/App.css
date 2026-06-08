@@ -250,6 +250,20 @@ button.counter {
   color: var(--danger);
 }
 
+/* Provider badge */
+.source-badge {
+  margin: -6px 0 14px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.source-badge code {
+  background: #eef1f6;
+  padding: 1px 6px;
+  border-radius: 5px;
+}
+
 /* Error */
 .error {
   background: var(--danger-soft);
